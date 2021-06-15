@@ -1,26 +1,3 @@
-"""class Edge:
-    def __init__(self, v1: '__main__.Vertex', v2: '__main__.Vertex'):
-        self.vertices = {v1, v2}
-        self.edge_color = None          # for the sake of simplicity colors are assumed to be integers
-
-    def color(self, color: int):
-        self.edge_color = color
-
-
-class Vertex:
-    def __init__(self, v: int):
-        self.vertex_number = v
-        self.adjacencies = []
-        self.degree = 0
-
-    def add_adjacency(self, vertex: '__main__.Vertex'):
-        if vertex not in self.adjacencies:
-            self.adjacencies.append(vertex)
-            self.degree += 1
-
-"""
-
-
 class Graph:
     def __init__(self, number_of_vertices: int):
         self.adjacency_matrix = [[[0, None] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
@@ -28,6 +5,16 @@ class Graph:
     def add_edge(self, v1: int, v2: int):
         self.adjacency_matrix[v1][v2][0] = 1
         self.adjacency_matrix[v2][v1][0] = 1
+
+    def max_degree(self):
+        delta = 0
+        for neighbours in self.adjacency_matrix:
+            degree = 0
+            for neighbour in neighbours:
+                degree += neighbour[0]
+            if degree > delta:
+                delta = degree
+        return delta
 
 
 def get_input():
@@ -43,6 +30,12 @@ def get_input():
         v1 = int(vertices[0])
         v2 = int(vertices[1])
         graph.add_edge(v1, v2)
+    return graph
 
 
-get_input()
+if __name__ == "__main__":
+    graph = get_input()
+    p = graph.adjacency_matrix[0][0]
+    max_degree = graph.max_degree()
+    colors = range(1, max_degree+2)
+
