@@ -55,9 +55,9 @@ class Fan:
         self.f_vertex = vertices[0]
         self.vertices = vertices
         self.graph = graph
-        self.c_color = list(self.graph.free_colors(self.x_vertex))[0]
-        self.d_color = list(self.graph.free_colors(self.l_vertex))[1] if list(self.graph.free_colors(self.l_vertex))[0] == self.c_color\
-            else list(self.graph.free_colors(self.l_vertex))[0]
+        self.d_color = list(self.graph.free_colors(self.l_vertex))[0]
+        self.c_color = list(self.graph.free_colors(self.x_vertex))[1] if list(self.graph.free_colors(self.x_vertex))[0] == self.d_color\
+            else list(self.graph.free_colors(self.x_vertex))[0]
 
     def invert_cd_path(self):
         start = self.x_vertex
@@ -76,11 +76,11 @@ class Fan:
                 elif self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.d_color and i not in visited:
                     self.graph.adjacency_matrix[start][i][1] = self.c_color
                     self.graph.adjacency_matrix[i][start][1] = self.c_color
+                    if start == self.x_vertex:
+                        vplus_vertex = i
                     start = i
                     flag = 1
                     visited.append(i)
-                    if start == self.x_vertex:
-                        vplus_vertex = i
                     break
             if flag == 0:
                 end_point = start
@@ -118,20 +118,15 @@ def get_input():
 
 
 def dfs(start: int, adj_list: list, visited: list, number_of_fan_edges: int, graph: '__main__.Graph'):
-    # goal of dfs is to visit all the vertices of fan edges i.e, <f..l>.
-    if len(visited) == number_of_fan_edges-1:
-        visited.append(start)
-        return visited
-    else:
-        visited.append(start)
-        path = []
-        for i in adj_list[start]:
-            if i not in visited:
-                child_result = dfs(i, adj_list, visited[:], number_of_fan_edges, graph)
-                if child_result:
-                    path = child_result[:]
-                    break
-        return path
+    visited.append(start)
+    path = []
+    for i in adj_list[start]:
+        if i not in visited:
+            child_result = dfs(i, adj_list, visited[:], number_of_fan_edges, graph)
+            if len(child_result) > len(path):
+                path = child_result[:]
+    path.insert(0, start)
+    return path
 
 
 def make_fan(x: int, uncolored_f: int, colored_list: list, graph: '__main__.Graph'):
@@ -157,27 +152,26 @@ def algorithm(graph: '__main__.Graph'):
             if vplus == -1:
                 # case0. NO fan edge has the color d.
                 fan.rotate()
-            elif vplus-1 == cd_path_end_point:
+            elif fan.vertices[fan.vertices.index(vplus)-1] == cd_path_end_point:
                 # case1 when v is included in the cd path.
                 fan.rotate()
             else:
                 # case1 when v is not included in the cd path.
-                fan.prefix_fan(vplus-1)
+                fan.prefix_fan(fan.vertices[fan.vertices.index(vplus)-1])
                 fan.rotate()
 
 
 if __name__ == "__main__":
-    # graph = get_input()
-    input_graph = Graph(4)
-    test = [[[0,0], [1,0],[0,0], [1,0]],\
-            [[1,0], [0,0],[1,0], [1,0]],\
-            [[0,0], [1,0],[0,0], [1,0]],\
-            [[1,0], [1,0], [1,0], [0,0]]]
+    # input_graph = get_input()
+    # algorithm(input_graph)
+    input_graph = Graph(5)
+    test = [[[0, 0], [1, 0], [0, 0], [1, 0], [0, 0]], [[1, 0], [0, 0], [1, 0], [0, 0], [1, 0]], [[0, 0], [1, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 0], [1, 0], [0, 0], [1, 0]], [[0, 0], [1, 0], [1, 0], [1, 0], [0, 0]]]
     input_graph.adjacency_matrix = test
-    input_graph.number_of_vertices = 4
+    input_graph.number_of_vertices = 5
     input_graph.Delta = 3
     input_graph.color_set = {1, 2, 3, 4}
     algorithm(input_graph)
+
     print(input_graph.adjacency_matrix)
 
 
