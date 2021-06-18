@@ -61,23 +61,45 @@ class Fan:
 
     def invert_cd_path(self):
         start = self.x_vertex
-        end_point = self.x_vertex
+        vplus_vertex = -1
+        visited = [start]
         while True:
             flag = 0
             for i in range(self.graph.number_of_vertices):
-                if self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.c_color:
+                if self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.c_color and i not in visited:
                     self.graph.adjacency_matrix[start][i][1] = self.d_color
+                    self.graph.adjacency_matrix[i][start][1] = self.d_color
                     start = i
                     flag = 1
+                    visited.append(i)
                     break
-                elif self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.d_color:
+                elif self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.d_color and i not in visited:
                     self.graph.adjacency_matrix[start][i][1] = self.c_color
+                    self.graph.adjacency_matrix[i][start][1] = self.c_color
                     start = i
                     flag = 1
+                    visited.append(i)
+                    if start == self.x_vertex:
+                        vplus_vertex = i
                     break
             if flag == 0:
+                end_point = start
                 break
-        return end_point
+        return end_point, vplus_vertex
+
+    def prefix_fan(self, w: int):
+        w_index = self.vertices.index(w)
+        self.vertices = self.vertices[:w_index+1]
+        self.l_vertex = w
+
+    def rotate(self):
+        fan_vertices = len(self.vertices)
+        for i in range(fan_vertices-1):
+            self.graph.adjacency_matrix[self.x_vertex][self.vertices[i]][1] = self.graph.adjacency_matrix[self.x_vertex][self.vertices[i + 1]][1]
+            self.graph.adjacency_matrix[self.vertices[i]][self.x_vertex][1] = self.graph.adjacency_matrix[self.x_vertex][self.vertices[i + 1]][1]
+        self.graph.adjacency_matrix[self.x_vertex][self.l_vertex][1] = self.d_color
+        self.graph.adjacency_matrix[self.l_vertex][self.x_vertex][1] = self.d_color
+
 
 def get_input():
     input_line = input()
@@ -131,23 +153,32 @@ def algorithm(graph: '__main__.Graph'):
     for x in range(graph.number_of_vertices):
         for fan_vertices in graph.uncolored_neighbours(x):
             fan = make_fan(x, fan_vertices, graph.colored_neighbours(x), graph)
-            fan.invert_cd_path()
-            # rotate_and_color()
+            cd_path_end_point, vplus = fan.invert_cd_path()
+            if vplus == -1:
+                # case0. NO fan edge has the color d.
+                fan.rotate()
+            elif vplus-1 == cd_path_end_point:
+                # case1 when v is included in the cd path.
+                fan.rotate()
+            else:
+                # case1 when v is not included in the cd path.
+                fan.prefix_fan(vplus-1)
+                fan.rotate()
 
 
 if __name__ == "__main__":
     # graph = get_input()
     input_graph = Graph(4)
-    test = [[[0,0], [1,4],[0,0], [1,2]],\
-            [[1,4], [0,0],[1,0], [1,3]],\
+    test = [[[0,0], [1,0],[0,0], [1,0]],\
+            [[1,0], [0,0],[1,0], [1,0]],\
             [[0,0], [1,0],[0,0], [1,0]],\
-            [[1,0], [1,3], [1,0], [0,0]]]
+            [[1,0], [1,0], [1,0], [0,0]]]
     input_graph.adjacency_matrix = test
     input_graph.number_of_vertices = 4
     input_graph.Delta = 3
     input_graph.color_set = {1, 2, 3, 4}
-    make_fan(1, 2, input_graph.colored_neighbours(1), input_graph).invert_cd_path()
-    print("j")
+    algorithm(input_graph)
+    print(input_graph.adjacency_matrix)
 
 
 
