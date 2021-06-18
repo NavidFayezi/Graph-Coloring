@@ -49,9 +49,35 @@ class Graph:
 
 
 class Fan:
-    def __init__(self):
-        pass
+    def __init__(self, x: int, vertices: list, graph: '__main__.Graph'):
+        self.x_vertex = x
+        self.l_vertex = vertices[-1]
+        self.f_vertex = vertices[0]
+        self.vertices = vertices
+        self.graph = graph
+        self.c_color = list(self.graph.free_colors(self.x_vertex))[0]
+        self.d_color = list(self.graph.free_colors(self.l_vertex))[1] if list(self.graph.free_colors(self.l_vertex))[0] == self.c_color\
+            else list(self.graph.free_colors(self.l_vertex))[0]
 
+    def invert_cd_path(self):
+        start = self.x_vertex
+        end_point = self.x_vertex
+        while True:
+            flag = 0
+            for i in range(self.graph.number_of_vertices):
+                if self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.c_color:
+                    self.graph.adjacency_matrix[start][i][1] = self.d_color
+                    start = i
+                    flag = 1
+                    break
+                elif self.graph.adjacency_matrix[start][i][0] == 1 and self.graph.adjacency_matrix[start][i][1] == self.d_color:
+                    self.graph.adjacency_matrix[start][i][1] = self.c_color
+                    start = i
+                    flag = 1
+                    break
+            if flag == 0:
+                break
+        return end_point
 
 def get_input():
     input_line = input()
@@ -96,39 +122,31 @@ def make_fan(x: int, uncolored_f: int, colored_list: list, graph: '__main__.Grap
             for k in temp_list:
                 if j == graph.edge_color(x, k):
                     adj_list[i].append(k)
-    t = dfs(uncolored_f, adj_list, [], len(temp_list), graph)
-    print("hey")
-
-
-def invert_cd_path():
-    pass
-
-
-def rotate_and_color():
-    pass
+    fan_vertices = dfs(uncolored_f, adj_list, [], len(temp_list), graph)
+    fan = Fan(x, fan_vertices, graph)
+    return fan
 
 
 def algorithm(graph: '__main__.Graph'):
     for x in range(graph.number_of_vertices):
         for fan_vertices in graph.uncolored_neighbours(x):
-            make_fan(x, fan_vertices, graph.colored_neighbours(x), graph)
-            invert_cd_path()
-            rotate_and_color()
-
+            fan = make_fan(x, fan_vertices, graph.colored_neighbours(x), graph)
+            fan.invert_cd_path()
+            # rotate_and_color()
 
 
 if __name__ == "__main__":
-    #graph = get_input()
-    graph = Graph(4)
+    # graph = get_input()
+    input_graph = Graph(4)
     test = [[[0,0], [1,4],[0,0], [1,2]],\
             [[1,4], [0,0],[1,0], [1,3]],\
             [[0,0], [1,0],[0,0], [1,0]],\
             [[1,0], [1,3], [1,0], [0,0]]]
-    graph.adjacency_matrix = test
-    graph.number_of_vertices = 4
-    graph.Delta = 3
-    graph.color_set = {1, 2, 3, 4}
-    make_fan(1, 2, graph.colored_neighbours(1), graph)
+    input_graph.adjacency_matrix = test
+    input_graph.number_of_vertices = 4
+    input_graph.Delta = 3
+    input_graph.color_set = {1, 2, 3, 4}
+    make_fan(1, 2, input_graph.colored_neighbours(1), input_graph).invert_cd_path()
     print("j")
 
 
