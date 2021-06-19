@@ -1,3 +1,6 @@
+import random
+
+
 class Graph:
     def __init__(self, number_of_vertices: int):
         # [0, 0] the first element indicates the adjacency, the second element indicates the color. 0 -> no color.
@@ -46,6 +49,12 @@ class Graph:
 
     def edge_color(self, v1: int, v2: int):
         return self.adjacency_matrix[v1][v2][1]
+
+    def __str__(self):
+        str_val = ""
+        for i in range(self.number_of_vertices):
+            str_val += str(self.adjacency_matrix[i])+"\n"
+        return str_val
 
 
 class Fan:
@@ -161,19 +170,42 @@ def algorithm(graph: '__main__.Graph'):
                 fan.rotate()
 
 
+def graph_generator():
+    number_of_vertices = random.randint(15, 15)
+    adjacency_matrix = [[[0, 0] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
+    for i in range(number_of_vertices):
+        for j in range(number_of_vertices):
+            if random.randint(0, 1) == 1 and i != j:
+                adjacency_matrix[i][j][0] = 1
+                adjacency_matrix[j][i][0] = 1
+    graph = Graph(number_of_vertices)
+    graph.adjacency_matrix = adjacency_matrix
+    graph.max_degree()
+    return graph
+
+
+def check_validity(graph: '__main__.Graph'):
+    for i in range(graph.number_of_vertices):
+        colors = []
+        for j in range(graph.number_of_vertices):
+            if graph.adjacency_matrix[i][j] != graph.adjacency_matrix[j][i]:
+                raise RuntimeError("adjacency matrix is not symetric: m[i][j] = " + str(graph.adjacency_matrix[i][j]) + "\nm[j][i] = " + str(graph.adjacency_matrix[j][i]))
+            if graph.adjacency_matrix[i][j][0] == 1 and graph.adjacency_matrix[i][j][1] == 0:
+                raise RuntimeError("Uncolored edge: " + str(i) + " to " + str(j))
+            if graph.adjacency_matrix[i][j][0] == 0 and graph.adjacency_matrix[i][j][1] != 0:
+                raise RuntimeError("invalid edge colored: " + str(i) + " to " + str(j))
+            if graph.adjacency_matrix[i][j][1] in colors:
+                raise RuntimeError("Invalid coloring: " + str(i) + " to " + str(j))
+            elif graph.adjacency_matrix[i][j][1] != 0:
+                colors.append(graph.adjacency_matrix[i][j][1])
+    print("The algorithm works!")
+
+
 if __name__ == "__main__":
     # input_graph = get_input()
     # algorithm(input_graph)
-    input_graph = Graph(5)
-    test = [[[0, 0], [1, 0], [0, 0], [1, 0], [0, 0]], [[1, 0], [0, 0], [1, 0], [0, 0], [1, 0]], [[0, 0], [1, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 0], [1, 0], [0, 0], [1, 0]], [[0, 0], [1, 0], [1, 0], [1, 0], [0, 0]]]
-    input_graph.adjacency_matrix = test
-    input_graph.number_of_vertices = 5
-    input_graph.Delta = 3
-    input_graph.color_set = {1, 2, 3, 4}
+    input_graph = graph_generator()
     algorithm(input_graph)
-
-    print(input_graph.adjacency_matrix)
-
-
+    check_validity(input_graph)
 
 
