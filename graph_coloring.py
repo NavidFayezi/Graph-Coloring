@@ -132,8 +132,9 @@ def dfs(start: int, adj_list: list, visited: list, number_of_fan_edges: int, gra
     for i in adj_list[start]:
         if i not in visited:
             child_result = dfs(i, adj_list, visited[:], number_of_fan_edges, graph)
-            if len(child_result) > len(path):
+            if len(child_result) > 0:
                 path = child_result[:]
+                break
     path.insert(0, start)
     return path
 
@@ -171,7 +172,7 @@ def algorithm(graph: '__main__.Graph'):
 
 
 def graph_generator():
-    number_of_vertices = random.randint(15, 15)
+    number_of_vertices = random.randint(50, 50)
     adjacency_matrix = [[[0, 0] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
     for i in range(number_of_vertices):
         for j in range(number_of_vertices):
