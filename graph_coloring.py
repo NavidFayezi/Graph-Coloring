@@ -1,3 +1,4 @@
+import time
 import random
 
 
@@ -40,7 +41,7 @@ class Graph:
                 neighbours.append(i)
         return neighbours
 
-    def free_colors(self, vertex: int): # returns free colors at a given vertex. Refer to the article for more details.
+    def free_colors(self, vertex: int):     # returns free colors at a given vertex. Refer to the article for more details.
         incident_colors = set()
         for i in range(self.number_of_vertices):
             if self.adjacency_matrix[i][vertex][0] == 1 and self.adjacency_matrix[i][vertex][1] != 0:
@@ -126,30 +127,22 @@ def get_input():
     return graph
 
 
-def dfs(start: int, adj_list: list, visited: list, number_of_fan_edges: int, graph: '__main__.Graph'):
-    visited.append(start)
-    path = []
-    for i in adj_list[start]:
-        if i not in visited:
-            child_result = dfs(i, adj_list, visited[:], number_of_fan_edges, graph)
-            if len(child_result) > 0:
-                path = child_result[:]
-                break
-    path.insert(0, start)
-    return path
-
-
 def make_fan(x: int, uncolored_f: int, colored_list: list, graph: '__main__.Graph'):
-    adj_list = [[] for i in range(graph.number_of_vertices)]
-    temp_list = colored_list[:]
-    temp_list.append(uncolored_f)
-    # construct a graph of possible combinations of edges(vertices) in a fan
-    for i in temp_list:
-        for j in graph.free_colors(i):
-            for k in temp_list:
-                if j == graph.edge_color(x, k):
-                    adj_list[i].append(k)
-    fan_vertices = dfs(uncolored_f, adj_list, [], len(temp_list), graph)
+    fan_vertices = [uncolored_f]
+    temp = uncolored_f
+    while True:
+        flag = 0
+        for color in graph.free_colors(temp):
+            for vertex in colored_list:
+                if color == graph.edge_color(x, vertex) and vertex not in fan_vertices:
+                    fan_vertices.append(vertex)
+                    temp = vertex
+                    flag = 1
+                    break
+            if flag == 1:
+                break
+        if flag == 0:
+            break
     fan = Fan(x, fan_vertices, graph)
     return fan
 
@@ -158,25 +151,27 @@ def algorithm(graph: '__main__.Graph'):
     for x in range(graph.number_of_vertices):
         for fan_vertices in graph.uncolored_neighbours(x):
             fan = make_fan(x, fan_vertices, graph.colored_neighbours(x), graph)
-            cd_path_end_point, vplus = fan.invert_cd_path()
+            cd_path_end_point, vplus = fan.invert_cd_path()     # vplus: refer to the article.
             if vplus == -1:
                 # case0. NO fan edge has the color d.
                 fan.rotate()
-            elif fan.vertices[fan.vertices.index(vplus)-1] == cd_path_end_point:
-                # case1 when v is included in the cd path.
-                fan.rotate()
             else:
-                # case1 when v is not included in the cd path.
-                fan.prefix_fan(fan.vertices[fan.vertices.index(vplus)-1])
-                fan.rotate()
+                v = fan.vertices.index(vplus)-1     # v: refer to the article.
+                if fan.vertices[v] == cd_path_end_point:
+                    # case1 when v is included in the cd path.
+                    fan.rotate()
+                else:
+                    # case1 when v is not included in the cd path.
+                    fan.prefix_fan(fan.vertices[v])
+                    fan.rotate()
 
 
 def graph_generator():
-    number_of_vertices = random.randint(50, 50)
+    number_of_vertices = random.randint(60, 60)
     adjacency_matrix = [[[0, 0] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
     for i in range(number_of_vertices):
         for j in range(number_of_vertices):
-            if random.randint(0, 1) == 1 and i != j:
+            if (random.randint(0, 1) == 1 or True) and i != j:
                 adjacency_matrix[i][j][0] = 1
                 adjacency_matrix[j][i][0] = 1
     graph = Graph(number_of_vertices)
@@ -202,11 +197,16 @@ def check_validity(graph: '__main__.Graph'):
     print("The algorithm works!")
 
 
-if __name__ == "__main__":
+def main():
     # input_graph = get_input()
     # algorithm(input_graph)
     input_graph = graph_generator()
     algorithm(input_graph)
     check_validity(input_graph)
 
+
+if __name__ == "__main__":
+    start = time.time()
+    main()
+    print((time.time() - start))
 
