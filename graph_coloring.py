@@ -4,7 +4,7 @@ import random
 
 class Graph:
     def __init__(self, number_of_vertices: int):
-        # [0, 0] the first element indicates the adjacency, the second element indicates the color. 0 -> no color.
+        # [0, 0] the first element indicates the vertices are incident, the second element indicates the color. 0 -> no color.
         self.adjacency_matrix = [[[0, 0] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
         self.number_of_vertices = number_of_vertices
         self.color_set = set(range(1, self.max_degree()+2))
@@ -112,8 +112,7 @@ class Fan:
 
 
 def get_input():
-    input_line = input()
-    input_line = input_line.split(" ")
+    input_line = input().split(" ")
     assert len(input_line) == 2
     number_of_vertices = int(input_line[0])
     number_of_edges = int(input_line[1])
@@ -167,11 +166,12 @@ def algorithm(graph: '__main__.Graph'):
 
 
 def graph_generator():
-    number_of_vertices = random.randint(60, 60)
+    number_of_vertices = random.randint(2, 100)
+    print("Number of vertices: ", number_of_vertices)
     adjacency_matrix = [[[0, 0] for i in range(number_of_vertices)] for j in range(number_of_vertices)]
     for i in range(number_of_vertices):
         for j in range(number_of_vertices):
-            if (random.randint(0, 1) == 1 or True) and i != j:
+            if random.randint(0, 1) == 1 and i != j:
                 adjacency_matrix[i][j][0] = 1
                 adjacency_matrix[j][i][0] = 1
     graph = Graph(number_of_vertices)
@@ -194,7 +194,7 @@ def check_validity(graph: '__main__.Graph'):
                 raise RuntimeError("Invalid coloring: " + str(i) + " to " + str(j))
             elif graph.adjacency_matrix[i][j][1] != 0:
                 colors.append(graph.adjacency_matrix[i][j][1])
-    print("The algorithm works!")
+    print("The algorithm works fine!")
 
 
 def main():
@@ -208,5 +208,5 @@ def main():
 if __name__ == "__main__":
     start = time.time()
     main()
-    print((time.time() - start))
+    print("Elapsed time:", time.time() - start, "seconds")
 
