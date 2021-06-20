@@ -1,3 +1,8 @@
+"""
+    Implementation of the algorithm described in Misra, J., and David Gries. 1992.
+    "A constructive proof of Vizing's theorem." Information Processing Letters 131-133
+
+"""
 import time
 import random
 
@@ -50,6 +55,14 @@ class Graph:
 
     def edge_color(self, v1: int, v2: int):
         return self.adjacency_matrix[v1][v2][1]
+
+    def used_colors_counter(self):
+        colors = []
+        for i in range(self.number_of_vertices):
+            for j in range(self.number_of_vertices):
+                if self.adjacency_matrix[i][j][0] == 1 and self.adjacency_matrix[i][j][1] not in colors:
+                    colors.append(self.adjacency_matrix[i][j][1])
+        return len(colors)
 
     def __str__(self):
         str_val = ""
@@ -109,21 +122,6 @@ class Fan:
             self.graph.adjacency_matrix[self.vertices[i]][self.x_vertex][1] = self.graph.adjacency_matrix[self.x_vertex][self.vertices[i + 1]][1]
         self.graph.adjacency_matrix[self.x_vertex][self.l_vertex][1] = self.d_color
         self.graph.adjacency_matrix[self.l_vertex][self.x_vertex][1] = self.d_color
-
-
-def get_input():
-    input_line = input().split(" ")
-    assert len(input_line) == 2
-    number_of_vertices = int(input_line[0])
-    number_of_edges = int(input_line[1])
-    graph = Graph(number_of_vertices)
-    for i in range(number_of_edges):
-        vertices = input().split(" ")
-        assert len(vertices) == 2
-        v1 = int(vertices[0])
-        v2 = int(vertices[1])
-        graph.add_edge(v1, v2)
-    return graph
 
 
 def make_fan(x: int, uncolored_f: int, colored_list: list, graph: '__main__.Graph'):
@@ -197,16 +195,38 @@ def check_validity(graph: '__main__.Graph'):
     print("The algorithm works fine!")
 
 
+def get_input():
+    input_line = input().split(" ")
+    assert len(input_line) == 2
+    number_of_vertices = int(input_line[0])
+    number_of_edges = int(input_line[1])
+    graph = Graph(number_of_vertices)
+    for i in range(number_of_edges):
+        vertices = input().split(" ")
+        assert len(vertices) == 2
+        v1 = int(vertices[0])
+        v2 = int(vertices[1])
+        graph.add_edge(v1, v2)
+    return graph
+
+
+def output_func(graph: '__main__.Graph'):
+    print(graph.max_degree(), graph.used_colors_counter())
+    for i in range(graph.number_of_vertices):
+        for j in range(i+1, graph.number_of_vertices):
+            if graph.adjacency_matrix[i][j][0] == 1:
+                print(i, j, graph.adjacency_matrix[i][j][1])
+
+
 def main():
-    # input_graph = get_input()
-    # algorithm(input_graph)
-    input_graph = graph_generator()
+    input_graph = get_input()
     algorithm(input_graph)
-    check_validity(input_graph)
+    output_func(input_graph)
+    # input_graph = graph_generator()
+    # algorithm(input_graph)
+    # check_validity(input_graph)
 
 
 if __name__ == "__main__":
-    start = time.time()
     main()
-    print("Elapsed time:", time.time() - start, "seconds")
 
