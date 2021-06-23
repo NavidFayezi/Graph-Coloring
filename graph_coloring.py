@@ -18,7 +18,6 @@ class Graph:
     def add_edge(self, v1: int, v2: int):
         self.adjacency_matrix[v1][v2][0] = 1
         self.adjacency_matrix[v2][v1][0] = 1
-        self.max_degree()
 
     def max_degree(self):
         delta = 0
@@ -207,6 +206,7 @@ def get_input():
         v1 = int(vertices[0])
         v2 = int(vertices[1])
         graph.add_edge(v1, v2)
+    graph.max_degree()
     return graph
 
 
